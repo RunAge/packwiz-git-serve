@@ -1,0 +1,67 @@
+services:
+  packwiz-pull-serve:
+    user: "0:0"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      # Webhook listener port
+      - "${WEBHOOK_PORT:-8080}:${WEBHOOK_PORT:-8080}"
+      # File serve port
+      - "${FILE_SERVE_PORT:-8081}:${FILE_SERVE_PORT:-8081}"
+    environment:
+      # Required: GitHub webhook secret
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET}
+
+      # Required: Target branch to pull from
+      TARGET_BRANCH: ${TARGET_BRANCH:-main}
+
+      # Required: GitHub repository (format: github.com/owner/repo)
+      TARGET_REPO: ${TARGET_REPO}
+
+      # Required: Deploy key (base64 encoded) OR path to key file
+      # Option 1: Base64 encoded SSH private key
+      #DEPLOY_KEY: ${DEPLOY_KEY}
+      # Option 2: Path to SSH private key file (if mounted)
+      DEPLOY_KEY_PATH: /run/secrets/deploy_key
+
+      # Optional: Local path for repository clone (default: /tmp/packwiz-repo)
+      REPO_PATH: ${REPO_PATH:-/tmp/packwiz-repo}
+
+      # Optional: Subdirectory within repo to serve (default: /)
+      FILE_SERVE_PATH: ${FILE_SERVE_PATH:-/}
+
+      # Optional: Port for webhook listener (default: 8080)
+      WEBHOOK_PORT: ${WEBHOOK_PORT:-8080}
+
+      # Optional: Port for file serving (default: 8081)
+      FILE_SERVE_PORT: ${FILE_SERVE_PORT:-8081}
+
+      # Optional: Address to bind to (default: 0.0.0.0)
+      LISTEN_ADDR: ${LISTEN_ADDR:-0.0.0.0}
+
+    # Mount volumes for persistence
+    volumes:
+      # Repository clone directory
+      - packwiz-repo:/tmp/packwiz-repo
+      # SSH directory for known_hosts (optional)
+      - packwiz-ssh:/home/app/.ssh
+
+    secrets:
+      - source: deploy_key
+        target: deploy_key
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Resource limits (optional)
+    # mem_limit: 512m
+    # cpus: '0.5'
+
+volumes:
+  packwiz-repo:
+  packwiz-ssh:
+
+secrets:
+  deploy_key:
+    file: ${DEPLOY_KEY_FILE:-./keys/deploy-key}

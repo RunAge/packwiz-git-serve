@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+.jj
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build artifacts
+packwiz-pull-serve
+dist/
+build/
+
+# Environment and secrets
+.env
+.env.local
+*.key
+deploy-key*
+
+# Logs
+*.log
+
+# OS files
+Thumbs.db
