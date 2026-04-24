@@ -32,7 +32,6 @@ deploy-key*
 .ssh/
 
 # Go
-go.sum
 /vendor/
 
 # OS
